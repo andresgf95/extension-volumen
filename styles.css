@@ -1,0 +1,134 @@
+:root {
+    --background-color: linear-gradient(135deg, #1b1b02, #3e006b); 
+    --text-color: #a000a0;      
+    --accent-color: #ffbb00;    
+    --slider-track: #c8ff004d;   
+    --slider-thumb: var(--accent-color); 
+    --warning-color: #fd7e14;   
+    --reset-bg: #752cb1;       
+    --reset-hover: #ba62cc7a;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    width: 350px; 
+    margin: 0;
+    padding: 0;
+    background: var(--background-color);
+    color: var(--text-color);
+
+}
+
+.container {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+h1 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 0;
+    color: var(--accent-color);
+    letter-spacing: 1px;
+}
+
+#resetButton {
+    background-color: var(--reset-bg);
+    color: #ffbb00;
+    border: none;
+    padding: 8px;
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 1em;
+    font-weight:bolder;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+#resetButton:hover {
+    background-color: var(--reset-hover);
+}
+
+
+.slider-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+#volumeSlider {
+    width: 100%; 
+    height: 8px;
+    cursor: pointer;
+    appearance: none; 
+    background: linear-gradient(to right, var(--accent-color), var(--accent-color) 0%, var(--slider-track) 0%, var(--slider-track));
+    border-radius: 5px;
+    outline: none;
+    margin-bottom: 10px; 
+}
+
+#volumeSlider::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--slider-thumb);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+}
+
+#volumeSlider::-moz-range-thumb { 
+    width: 18px;
+    height: 18px;
+    background: var(--slider-thumb);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none; 
+     box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+}
+
+#volumeOutput {
+    font-size: 1.3em;
+    font-weight: 500;
+    color: var(--accent-color);
+    margin-top: 5px;
+    text-align: center;
+     min-width: 45px; 
+}
+
+.warning {
+    font-size: 1.3em;
+    color: var(--warning-color);
+    text-align: center;
+    margin-top: 20px;
+    border-top: 1px solid #bad13abb;
+    padding-top: 20px;
+    width: 100%;
+}
+
+.status {
+    font-size: 1.3em;
+    color: #87ec8fc7; 
+    margin-top: 8px;
+    height: 1.2em; 
+    text-align: center;
+}

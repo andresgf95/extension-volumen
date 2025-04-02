@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volume Amplifier</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>VOLUMEN</h1>
+             <button id="resetButton" title="Resetear a 100%">RESET</button>
+        </div>
+        <div class="slider-container">
+            <input type="range" id="volumeSlider" min="100" max="600" value="100" step="10">
+             <output id="volumeOutput" for="volumeSlider">100%</output>
+        </div>
+        <p class="warning">¡Cuidado! Volúmenes altos pueden distorsionar el audio o dañar tus altavoces/oídos.</p>
+        <p class="status" id="statusMessage"></p>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>
