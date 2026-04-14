@@ -2,6 +2,8 @@ const slider = document.getElementById('volumeSlider');
 const output = document.getElementById('volumeOutput');
 const resetButton = document.getElementById('resetButton');
 const statusMessage = document.getElementById('statusMessage');
+const APPLY_DEBOUNCE_MS = 120;
+let applyTimeoutId = null;
 
 
 function setPageVolume(level) {
@@ -57,6 +59,39 @@ function updateSliderUI(value) {
      slider.style.background = `linear-gradient(to right, var(--accent-color), var(--accent-color) ${percentage}%, var(--slider-track) ${percentage}%, var(--slider-track))`;
 }
 
+function isScriptableUrl(url) {
+    if (!url) return false;
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
+
+async function getTabStoredVolume(tabId) {
+    try {
+        const data = await chrome.storage.session.get('tabVolumes');
+        const tabVolumes = data.tabVolumes || {};
+        const storedValue = tabVolumes[String(tabId)];
+        return Number.isFinite(storedValue) ? storedValue : null;
+    } catch (e) {
+        console.warn('Error al leer storage.session', e);
+        return null;
+    }
+}
+
+async function setTabStoredVolume(tabId, value) {
+    try {
+        const data = await chrome.storage.session.get('tabVolumes');
+        const tabVolumes = data.tabVolumes || {};
+        tabVolumes[String(tabId)] = value;
+        await chrome.storage.session.set({ tabVolumes });
+    } catch (e) {
+        console.warn('Error al escribir storage.session', e);
+    }
+}
+
 async function applyVolume(value) {
      statusMessage.textContent = 'Aplicando...';
     try {
@@ -64,7 +99,7 @@ async function applyVolume(value) {
          if (!tab) {
             throw new Error("No se encontró pestaña activa.");
         }
-         if (!tab.url || tab.url.startsWith('chrome://')) {
+         if (!isScriptableUrl(tab.url)) {
              statusMessage.textContent = 'No aplicable en esta página.';
              slider.disabled = true;
              resetButton.disabled = true;
@@ -79,7 +114,7 @@ async function applyVolume(value) {
 
          if (results && results.length > 0 && results[0].result === true) {
              statusMessage.textContent = 'Volumen aplicado.';
-             chrome.storage.sync.set({ currentVolume: value });
+             await setTabStoredVolume(tab.id, value);
          } else {
             statusMessage.textContent = 'Error al aplicar.';
             console.error("Resultado de inyección:", results);
@@ -99,7 +134,7 @@ async function loadInitialVolume() {
 
      try {
         const data = await chrome.storage.sync.get('currentVolume');
-        if (data.currentVolume) {
+        if (Number.isFinite(data.currentVolume)) {
             currentVolume = data.currentVolume;
         }
      } catch(e) { console.warn("Error al leer storage", e);}
@@ -107,7 +142,11 @@ async function loadInitialVolume() {
 
     try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (tab && tab.id && (!tab.url || !tab.url.startsWith('chrome://'))) {
+        if (tab && tab.id && isScriptableUrl(tab.url)) {
+             const tabStoredVolume = await getTabStoredVolume(tab.id);
+             if (Number.isFinite(tabStoredVolume)) {
+                 currentVolume = tabStoredVolume;
+             }
              const results = await chrome.scripting.executeScript({
                  target: { tabId: tab.id },
                  func: getPageVolume
@@ -127,7 +166,7 @@ async function loadInitialVolume() {
     updateSliderUI(currentVolume);
 
      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-     if (tab && tab.url && tab.url.startsWith('chrome://')) {
+     if (!tab || !isScriptableUrl(tab.url)) {
         statusMessage.textContent = 'No aplicable aquí.';
          slider.disabled = true;
          resetButton.disabled = true;
@@ -141,10 +180,20 @@ async function loadInitialVolume() {
 slider.addEventListener('input', (event) => {
     const value = parseInt(event.target.value, 10);
     updateSliderUI(value);
-    applyVolume(value); 
+    if (applyTimeoutId) {
+        clearTimeout(applyTimeoutId);
+    }
+    applyTimeoutId = setTimeout(() => {
+        applyVolume(value);
+        applyTimeoutId = null;
+    }, APPLY_DEBOUNCE_MS);
 });
 
 resetButton.addEventListener('click', () => {
+    if (applyTimeoutId) {
+        clearTimeout(applyTimeoutId);
+        applyTimeoutId = null;
+    }
     slider.value = 100;
     updateSliderUI(100);
     applyVolume(100);

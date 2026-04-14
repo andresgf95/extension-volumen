@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Volume Amplifier",
-    "version": "1.0",
+    "version": "1.1.0",
     "description": "Aumenta el volumen del audio en la pestaña actual más allá del 100%.",
     "permissions": [
       "activeTab", 
